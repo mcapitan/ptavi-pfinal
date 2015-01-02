@@ -7,6 +7,7 @@ Programa cliente que abre un socket a un servidor
 import socket
 import sys
 import os
+import time
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 
@@ -15,10 +16,16 @@ metodo = str(sys.argv[2])
 opcion = (sys.argv[3])
 
 
-#Clase para manejar el xml
+
 class ClientHandler(ContentHandler):
+    """
+    Clase para manejar xml
+    """
 
     def __init__(self):
+        """
+        Constructor. Inicializamos las variables
+        """
         self.username = ''
         self.passwd = ''
         self.ip_uaserver = ''
@@ -63,46 +70,75 @@ else:
     my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     my_socket.connect((cHandler.ip_regproxy, int(cHandler.puerto_regproxy)))
 
+    #Fichero de log
+    time = time.strftime("%Y%m%d%H%M%S", time.localtime())
+    fichero = open(cHandler.path_log, "a")
+
     # Contenido que vamos a enviar
     try:
         if metodo == 'REGISTER':
             LINE = metodo + ' sip:' + cHandler.username + ":"
             LINE += cHandler.ip_uaserver + ' SIP/2.0\r\n'
-            LINE += 'Expires: ' + sys.argv[3]
+            LINE += 'Expires: ' + opcion + '\r\n'
             #Envío el mensaje
             my_socket.send(LINE + '\r\n')
-            print 'Enviando: ' + data
+            print 'Enviando: ' + LINE
+            #Escribo en el log
+            fichero.write(str(time) + ' Starting...\r\n')
+            fichero.write(str(time) + ' Send to ' + cHandler.ip_regproxy + ":"
+            + str(cHandler.puerto_regproxy) + ": " + LINE)
             #Recibo el mensaje
             data = my_socket.recv(1024)
             print 'Recibido: ' + data
+            #Escribo en el log
+            fichero.write(str(time) + ' Received from ' + cHandler.ip_regproxy
+            + ":" + str(cHandler.puerto_regproxy) + ": " + data)
         elif metodo == 'INVITE':
-            LINE = metodo + ' sip:' + sys.argv[3] + ' SIP/2.0\r\n'
+            LINE = metodo + ' sip:' + opcion + ' SIP/2.0\r\n'
             LINE += 'Content-Type: application/sdp\r\n\r\n'
             LINE += 'v=0\r\n' + 'o=' + cHandler.username + ' '
             LINE += cHandler.ip_uaserver + '\r\n' + 's=misesion\r\n'
-            LINE += 't=0\r\n' + 'm=audio ' + cHandler.puerto_rtpaudio + ' RTP'
+            LINE += 't=0\r\n' + 'm=audio ' + str(cHandler.puerto_rtpaudio)
+            LINE += ' RTP'
             #Envío el mensaje
             my_socket.send(LINE + '\r\n')
-            print 'Enviando: ' + data
+            print 'Enviando: ' + LINE
+            #Escribo en el log
+            fichero.write(str(time) + ' Send to ' + cHandler.ip_regproxy + ":"
+            + str(cHandler.puerto_regproxy) + ": " + LINE + '\r\n')
             #Recibo el mensaje
             data = my_socket.recv(1024)
             print 'Recibido: ' + data
+            #Escribo en el log
+            fichero.write(str(time) + ' Received from ' + cHandler.ip_regproxy
+            + ":" + str(cHandler.puerto_regproxy) + ": " + data)
             #Envío el ACK
-            LINE1 = 'ACK sip:' + sys.argv[3] + ' SIP/2.0'
+            LINE1 = 'ACK sip:' + opcion + ' SIP/2.0'
             my_socket.send(LINE1 + '\r\n')
             print 'Enviando: ' + LINE1
             #data = my_socket.recv(1024)
             #print 'Recibido: ', data
         elif metodo == 'BYE':
-            LINE = metodo + ' sip:' + sys.argv[3] + ' SIP/2.0\r\n'
+            LINE = metodo + ' sip:' + opcion + ' SIP/2.0\r\n'
             #Envío el mensaje
             my_socket.send(LINE + '\r\n')
-            print 'Enviando: ' + data
+            print 'Enviando: ' + LINE
+            #Escribo en el log
+            fichero.write(str(time) + ' Send to ' + cHandler.ip_regproxy + ":"
+            + str(cHandler.puerto_regproxy) + ": " + LINE)
             #Recibo el mensaje
             data = my_socket.recv(1024)
             print 'Recibido: ' + data
-    #except socket.error:
-        #print 'Error: No server listening at ' + IPreceptor + ' port ' + puertoSIP
+            #Escribo en el log
+            fichero.write(str(time) + ' Received from ' + cHandler.ip_regproxy
+            + ":" + str(cHandler.puerto_regproxy) + ": " + data)
+            fichero.write(str(time) + ' Finishing.\r\n')
+    except socket.error:
+        print ('Error: No server listening at ' + cHandler.ip_uaserver +
+        ' port ' + str(cHandler.puerto_uaserver) + '\r\n')
+        #Escribo en el log
+        fichero.write('Error: No server listening at ' + cHandler.ip_uaserver
+        + str(cHandler.puerto_uaserver) + '\r\n')
 
     print "Terminando socket..."
 
