@@ -73,6 +73,7 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
                     reply += cHandler.ip_uaserver + '\r\n' + 's=misesion\r\n'
                     reply += 't=0\r\n' + 'm=audio ' + cHandler.puerto_rtpaudio
                     reply +=' RTP'
+                    self.wfile.write(reply)
                     #Envío el mensaje
                     my_socket.send(reply + '\r\n')
                     print 'Enviando: ' + reply
@@ -90,6 +91,7 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
                     reply += cHandler.ip_uaserver + '\r\n' + 's=misesion\r\n'
                     reply += 't=0\r\n' + 'm=audio ' + cHandler.puerto_rtpaudio
                     reply +=' RTP'
+                    self.wfile.write(reply)
                     #Envío el mensaje
                     my_socket.send(reply + '\r\n')
                     print 'Enviando: ' + reply
@@ -109,6 +111,7 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
                     print "Ha terminado\r\n"
                 else:
                     reply = 'SIP/2.0 405 Method Not Allowed'
+                    self.wfile.write(reply)
                     #Envío el mensaje
                     my_socket.send(reply + '\r\n')
                     print 'Enviando: ' + reply
