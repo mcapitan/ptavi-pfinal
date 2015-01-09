@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 """
-Programa cliente que abre un socket a un servidor
+Miriam Capitán Roca
+Programa cliente
 """
 
 import socket
@@ -111,19 +112,19 @@ if __name__ == "__main__":
             #Escribo en el log
             fichero.write(str(time) + ' Received from ' + cHandler.ip_regproxy
             + ":" + str(cHandler.puerto_regproxy) + ": " + data)
-            #Envío el ACK
-            LINE1 = 'ACK sip:' + opcion + ' SIP/2.0'
-            my_socket.send(LINE1 + '\r\n')
-            print 'Enviando: ' + LINE1
-            #Intercambio de RTP
-            aEjecutar = './mp32rtp -i ' + cHandler.ip_uaserver + ' -p '
-            aEjecutar += cHandler.puerto_uaserver + ' < '
-            aEjecutar += cHandler.audio
-            print "Vamos a ejecutar", aEjecutar
-            os.system(aEjecutar)
-            print "Ha terminado\r\n"
-            #data = my_socket.recv(1024)
-            #print 'Recibido: ', data
+            #Envío el ACK si el usuario está registrado
+            data = data.split()
+            if data[1] == '100' and data[4] == '180' and data[7] == '200':
+		        LINE1 = 'ACK sip:' + opcion + ' SIP/2.0'
+		        my_socket.send(LINE1 + '\r\n')
+		        print 'Enviando: ' + LINE1
+		        #Intercambio de RTP
+		        aEjecutar = './mp32rtp -i ' + data[13] + ' -p '
+		        aEjecutar += data[17] + ' < '
+		        aEjecutar += cHandler.path_audio
+		        print "Vamos a ejecutar", aEjecutar
+		        os.system(aEjecutar)
+		        print "Ha terminado\r\n"
         elif metodo == 'BYE':
             LINE = metodo + ' sip:' + opcion + ' SIP/2.0\r\n'
             #Envío el mensaje
