@@ -1,0 +1,66 @@
+20150109202521 Starting...
+20150109202521 Send to 127.0.0.1:5555: REGISTER sip:mcapitan@urjc.com:5678 SIP/2.0
+Expires: 3600
+20150109202521 Received from 127.0.0.1:5555: SIP/2.0 200 OK
+
+20150109202525 Send to 127.0.0.1:5555: INVITE sip:mcapitan@urjc.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mcapitan@urjc.com 127.0.0.1
+s=misesion
+t=0
+m=audio 23033 RTP
+20150109202525 Received from 127.0.0.1:5555: SIP/2.0 100 Trying
+
+SIP/2.0 180 Ringing
+
+SIP/2.0 200 OK
+
+Content-Type: application/sdp
+
+v=0
+o=mcapitan@urjc.com 127.0.0.1
+s=misesion
+t=0
+m=audio 23033 RTP20150109202530 Send to 127.0.0.1:5555: BYE sip:mcapitan@urjc.com SIP/2.0
+20150109202530 Received from 127.0.0.1:5555: SIP/2.0 200 OK
+
+Content-Type: application/sdp
+
+v=0
+o=mcapitan@urjc.com 127.0.0.1
+s=misesion
+t=0
+m=audio 23033 RTP20150109202530 Finishing.
+20150109202516 Received from 127.0.0.1:5555: INVITE sip:mcapitan@urjc.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mcapitan@urjc.com 127.0.0.1
+s=misesion
+t=0
+m=audio 23033 RTP
+20150109202516 Send to 127.0.0.1:5555: SIP/2.0 100 Trying
+
+SIP/2.0 180 Ringing
+
+SIP/2.0 200 OK
+
+Content-Type: application/sdp
+
+v=0
+o=mcapitan@urjc.com 127.0.0.1
+s=misesion
+t=0
+m=audio 23033 RTP20150109202516 Received from 127.0.0.1:5555: BYE sip:mcapitan@urjc.com SIP/2.0
+
+20150109202516 Send to 127.0.0.1:5555: SIP/2.0 200 OK
+
+Content-Type: application/sdp
+
+v=0
+o=mcapitan@urjc.com 127.0.0.1
+s=misesion
+t=0
+m=audio 23033 RTP
