@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 """
-Clase (y programa principal) para un servidor de eco en UDP simple
+Miriam Capitán Roca
+Programa 
 """
 
 import SocketServer
@@ -61,12 +62,15 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
             # Leyendo línea a línea lo que nos envía el cliente
             line = self.rfile.read()
             lista = line.split()
+            global ip_server
+            global puerto_server
             if not line:
                 break
             else:
                 if lista[0] == 'INVITE':
                     #Puerto adicional para recibir MP3
-                    puerto_rtp = lista[11]
+                    ip_server = lista[7]
+                    puerto_server = lista[11]
                     reply = 'SIP/2.0 100 Trying\r\n\r\n'
                     reply += 'SIP/2.0 180 Ringing\r\n\r\n'
                     reply += 'SIP/2.0 200 OK\r\n\r\n'
@@ -89,43 +93,34 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
                     reply = 'SIP/2.0 200 OK\r\n\r\n'
                     reply += 'Content-Type: application/sdp\r\n\r\n'
                     reply += 'v=0\r\n' + 'o=' + cHandler.username + ' '
-                    reply += cHandler.ip_uaserver + '\r\n' + 's=misesion\r\n'
-                    reply += 't=0\r\n' + 'm=audio ' + cHandler.puerto_rtpaudio
+                    reply += str(cHandler.ip_uaserver) + '\r\n' + 's=misesion\r\n'
+                    reply += 't=0\r\n' + 'm=audio ' + str(cHandler.puerto_rtpaudio)
                     reply +=' RTP'
                     #Escribo en el log
                     fichero.write(str(time) + ' Received from '
                     + cHandler.ip_regproxy + ":"
                     + str(cHandler.puerto_regproxy) + ": " + line)
-                    # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
-                    my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                    my_socket.connect((cHandler.ip_regproxy, int(cHandler.puerto_regproxy)))
-                    #Envío el mensaje
-                    my_socket.send(reply + '\r\n')
+                    self.wfile.write(reply)
                     print 'Enviando: ' + reply
                     #Escribo en el log
                     fichero.write(str(time) + ' Send to '
                     + cHandler.ip_regproxy + ":"
                     + str(cHandler.puerto_regproxy) + ": " + reply)
                 elif lista[0] == 'ACK':
-                    aEjecutar = './mp32rtp -i ' + cHandler.ip_uaserver + ' -p '
-                    aEjecutar += puerto_rtp + ' < '
-                    aEjecutar += cHandler.audio
+                    aEjecutar = './mp32rtp -i ' + ip_server + ' -p '
+                    aEjecutar += puerto_server + ' < '
+                    aEjecutar += str(cHandler.path_audio)
                     print "Vamos a ejecutar", aEjecutar
                     os.system(aEjecutar)
                     print "Ha terminado\r\n"
+
                 else:
                     reply = 'SIP/2.0 405 Method Not Allowed'
                     #Escribo en el log
                     fichero.write(str(time) + ' Received from '
                     + cHandler.ip_regproxy + ":"
                     + str(cHandler.puerto_regproxy) + ": " + line)
-                    # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
-                    my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                    my_socket.connect((cHandler.ip_regproxy, int(cHandler.puerto_regproxy)))
-                    #Envío el mensaje
-                    my_socket.send(reply + '\r\n')
+                    self.wfile.write(reply)
                     print 'Enviando: ' + reply
                     #Escribo en el log
                     fichero.write(str(time) + ' Send to '
