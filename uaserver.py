@@ -2,7 +2,7 @@
 # -*- coding: iso-8859-15 -*-
 """
 Miriam Capitán Roca
-Programa 
+Programa
 """
 
 import SocketServer
@@ -76,36 +76,40 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
                     reply += 'SIP/2.0 200 OK\r\n\r\n'
                     reply += 'Content-Type: application/sdp\r\n\r\n'
                     reply += 'v=0\r\n' + 'o=' + cHandler.username + ' '
-                    reply += str(cHandler.ip_uaserver) + '\r\n' + 's=misesion\r\n'
-                    reply += 't=0\r\n' + 'm=audio ' + str(cHandler.puerto_rtpaudio)
-                    reply +=' RTP'
+                    reply += str(cHandler.ip_uaserver) + '\r\n'
+                    reply += 's=misesion\r\n' + 't=0\r\n' + 'm=audio '
+                    reply += str(cHandler.puerto_rtpaudio) + ' RTP'
                     #Escribo en el log
                     fichero.write(str(time) + ' Received from '
-                    + cHandler.ip_regproxy + ":"
-                    + str(cHandler.puerto_regproxy) + ": " + line)
+                                  + cHandler.ip_regproxy + ":"
+                                  + str(cHandler.puerto_regproxy)
+                                  + ": " + line)
                     self.wfile.write(reply)
                     print 'Enviando: ' + reply
                     #Escribo en el log
                     fichero.write(str(time) + ' Send to '
-                    + cHandler.ip_regproxy + ":"
-                    + str(cHandler.puerto_regproxy) + ": " + reply)
+                                  + cHandler.ip_regproxy + ":"
+                                  + str(cHandler.puerto_regproxy)
+                                  + ": " + reply)
                 elif lista[0] == 'BYE':
                     reply = 'SIP/2.0 200 OK\r\n\r\n'
                     reply += 'Content-Type: application/sdp\r\n\r\n'
                     reply += 'v=0\r\n' + 'o=' + cHandler.username + ' '
-                    reply += str(cHandler.ip_uaserver) + '\r\n' + 's=misesion\r\n'
-                    reply += 't=0\r\n' + 'm=audio ' + str(cHandler.puerto_rtpaudio)
-                    reply +=' RTP'
+                    reply += str(cHandler.ip_uaserver) + '\r\n'
+                    reply += 's=misesion\r\n' + 't=0\r\n' + 'm=audio '
+                    reply += str(cHandler.puerto_rtpaudio) + ' RTP'
                     #Escribo en el log
                     fichero.write(str(time) + ' Received from '
-                    + cHandler.ip_regproxy + ":"
-                    + str(cHandler.puerto_regproxy) + ": " + line)
+                                  + cHandler.ip_regproxy + ":"
+                                  + str(cHandler.puerto_regproxy) + ": "
+                                  + line)
                     self.wfile.write(reply)
                     print 'Enviando: ' + reply
                     #Escribo en el log
                     fichero.write(str(time) + ' Send to '
-                    + cHandler.ip_regproxy + ":"
-                    + str(cHandler.puerto_regproxy) + ": " + reply)
+                                  + cHandler.ip_regproxy + ":"
+                                  + str(cHandler.puerto_regproxy) + ": "
+                                  + reply)
                 elif lista[0] == 'ACK':
                     aEjecutar = './mp32rtp -i ' + ip_server + ' -p '
                     aEjecutar += puerto_server + ' < '
@@ -118,14 +122,16 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
                     reply = 'SIP/2.0 405 Method Not Allowed'
                     #Escribo en el log
                     fichero.write(str(time) + ' Received from '
-                    + cHandler.ip_regproxy + ":"
-                    + str(cHandler.puerto_regproxy) + ": " + line)
+                                  + cHandler.ip_regproxy + ":"
+                                  + str(cHandler.puerto_regproxy) + ": "
+                                  + line)
                     self.wfile.write(reply)
                     print 'Enviando: ' + reply
                     #Escribo en el log
                     fichero.write(str(time) + ' Send to '
-                    + cHandler.ip_regproxy + ":"
-                    + str(cHandler.puerto_regproxy) + ": " + reply)
+                                  + cHandler.ip_regproxy + ":"
+                                  + str(cHandler.puerto_regproxy) + ": "
+                                  + reply)
 
 
 if __name__ == "__main__":
@@ -146,5 +152,5 @@ if __name__ == "__main__":
 
     # Creamos servidor de eco y escuchamos
     serv = SocketServer.UDPServer((cHandler.ip_uaserver,
-    int(cHandler.puerto_uaserver)), EchoHandler)
+                                   int(cHandler.puerto_uaserver)), EchoHandler)
     serv.serve_forever()
