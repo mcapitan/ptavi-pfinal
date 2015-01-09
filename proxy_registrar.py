@@ -45,76 +45,97 @@ class ProxyHandler(ContentHandler):
             self.path_log = attrs.get('path', "")
 
 
-
-class SIPRegisterHandler(SocketServer.DatagramRequestHandler):
+class EchoHandler(SocketServer.DatagramRequestHandler):
     """
     Echo server class
     """
-    dict = {}
-    direccion = ''
-    ip = ''
-    puerto = 0
-
-    def register2file(self):
-        fichero1 = open(cHandler.path_database, 'a')
-        #fichero1.write("DIRECCIÓN\tIP\tPUERTO\tFECHA\tEXPIRES\r\n")
-        fichero1.write(str(self.direccion) + '\t')
-        fichero1.write(str(self.ip) + '\t')
-        fichero1.write(str(self.puerto) + '\t')
-        fichero1.write(time.strftime("%Y%m%d%H%M%S", time.localtime()))
-        fichero1.write(str(self.exp) + '\r\n')
-        fichero1.close()
+    global Not_Found
+    Not_Found = "SIP/2.0 404 User Not Found\r\n"
+    my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def handle(self):
-        # Escribe dirección y puerto del cliente (de tupla client_address)
-        #IP = self.client_address[0]
-        #PUERTO = str(self.client_address[1])
-        #print "IP: " + IP + " PUERTO: " + PUERTO
+        #ip = self.client_address[0]
+        #puerto = str(self.client_address[1])
         while 1:
             # Leyendo línea a línea lo que nos envía el cliente
-            line = self.rfile.read()
-            lista = line.split()
+            LINE = self.rfile.read()
+            lista = LINE.split(' ')
+            if LINE:
+		        #Guarda la información registrada y la IP en un diccionario
+		        if lista[0] == "REGISTER":
+		            direccion = lista[1].split(':')[1]
+		            puerto = lista[1].split(':')[2]
+		            expires = int(lista[3])
+		            ip_puerto = (self.client_address[0], puerto)
+		            USUARIOS[direccion] = ip_puerto
+		            if expires != 0:
+		                #Escribo en el log
+		                fichero.write(str(time1) + ' Starting...\r\n')
+		                fichero.write(str(time1) + ' Receive from ' + ip_puerto[0]
+		                + ':' + ip_puerto[1] + ': ' + LINE)
+		                #Envío 200 OK
+		                reply = 'SIP/2.0 200 OK\r\n\r\n'
+		                print 'Enviando: ' + reply + ' a: ' + ip_puerto[0] + ' ' + ip_puerto[1]
+		                self.wfile.write(reply)
+		                fichero.write(str(time1) + ' Send to ' + ip_puerto[0] + ":"
+		                + ip_puerto[1] + ": " + reply)
+		                fichero1 = open(cHandler.path_database, 'a')
+		                #fichero1.write("DIRECCIÓN\tIP\tPUERTO\tFECHA\tEXPIRES\r\n")
+		                fichero1.write(str(direccion) + '\t')
+		                fichero1.write(str(ip_puerto[0]) + '\t')
+		                fichero1.write(str(ip_puerto[1]) + '\t')
+		                fichero1.write(time.strftime("%Y%m%d%H%M%S", time.localtime()) + '\t')
+		                fichero1.write(str(expires) + '\r\n')
+		                fichero1.close()
+		            elif expires == 0:
+		                del USUARIOS[direccion]
+		                #Envío 200 OK
+		                reply = 'SIP/2.0 200 OK\r\n\r\n'
+		                print 'Enviando: ' + reply + ' a: ' + ip_puerto[0] + ' ' + ip_puerto[1]
+		                self.wfile.write(reply)
+                        #Escribo en log
+		                fichero.write(str(time1) + ' Send to ' + ip_puerto[0] + ":"
+		                + ip_puerto[1] + ": " + reply)
+            elif not LINE:
+                break
 
-            #Guarda la información registrada y la IP en un diccionario
-            if lista[0] == "REGISTER":
-                self.direccion = lista[1].split(':')[1]
-                self.puerto = lista[1].split(':')[2]
-                expires = int(lista[4])
-                self.exp = expires
-                self.ip = self.client_address[0]
-                #puerto = str(self.client_address[1])
-                #Escribo en el log
-                fichero.write(str(time1) + ' Starting...\r\n')
-                fichero.write(str(time1) + ' Receive from ' + self.ip + ':'
-                + self.puerto + ': ' + line)
-                if expires == 0:
-                    if dict.has_keys(self.direccion):
-                        del dict[self.direccion]
-                        reply = 'SIP/2.0 200 OK\r\n\r\n'
-                        print 'Enviando: ' + reply
-                        #Escribo en el log
-                        fichero.write(str(time1) + ' Send to ' + self.ip + ":"
-                        + self.puerto + ": " + reply)
-                    else:
-                        reply = 'SIP/2.0 404 User Not Found\r\n'
-                        print 'Enviando: ' + reply
-                        #Escribo en el log
-                        fichero.write(str(time1) + ' Send to ' + self.ip + ":"
-                        + self.puerto + ": " + reply)
-                else:
-                    self.register2file()
-                    reply = 'SIP/2.0 200 OK\r\n\r\n'
-                    print 'Enviando: ' + reply
-                    #Escribo en el log
-                    fichero.write(str(time1) + ' Send to ' + self.ip + ":"
-                    + self.puerto + ": " + reply)
-                print "Enviado: " + reply
-                my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                my_socket.connect(self.ip, int(self.puerto))
-                my_socket.send(reply)
-            #if lista[0] == "INVITE":
+            if LINE:
+                if lista[0] == "INVITE":
+		            en_lista = False
+		            invitado = lista[1].split(':')[1]
+		            #print invitado
 
+		            for i in USUARIOS:
+		                if invitado == i:
+		                    en_lista = True
+		            if en_lista:
+		                self.my_socket.setsockopt(socket.SOL_SOCKET,
+		                                          socket.SO_REUSEADDR, 1)
+		                self.my_socket.connect((USUARIOS[invitado][0],
+		                                        int(USUARIOS[invitado][1])))
+		                self.my_socket.send(LINE)
+		                print 'Enviado: ' + LINE 
+                        #Escribo en log
+		                fichero.write(str(time1) + ' Send to ' + str(USUARIOS[invitado][0])
+                        + ":" + str(USUARIOS[invitado][1]) + ": " + LINE)
+		                #Recibo el mensaje
+		                data = self.my_socket.recv(1024)
+		                print 'Recibido: ' + data
+		                #Envio al ua1 el mensaje que recibo
+		                print "Enviado: " + data
+		                self.wfile.write(data)
+                        #Escribo en log
+		                fichero.write(str(time1) + ' Send to ' + str(USUARIOS[invitado][0])
+                        + ":" + str(USUARIOS[invitado][1]) + ": " + data)
+
+		            else:
+		                # Envio NOT_FOUND
+		                self.wfile.write(Not_Found)
+		                # Lo guardo en el fichero de seguimiento
+
+
+            elif not LINE:
+                break
 
 if __name__ == "__main__":
     parser = make_parser()
@@ -126,6 +147,8 @@ if __name__ == "__main__":
     time1 = time.strftime("%Y%m%d%H%M%S", time.localtime())
     fichero = open(cHandler.path_log, "a")
 
+    USUARIOS = {}
+
 if len(sys.argv) != 2 and sys.argv[1] != config:
     print('Usage: python uaserver.py config')
     print('SIP/2.0 400 Bad Request')
@@ -133,6 +156,6 @@ if len(sys.argv) != 2 and sys.argv[1] != config:
 else:
     # Creamos servidor de eco y escuchamos
     serv = SocketServer.UDPServer((cHandler.ip_server,
-    int(cHandler.puerto_server)), SIPRegisterHandler)
-    print "Listening...\r\n"
+    int(cHandler.puerto_server)), EchoHandler)
+    print "MiServer listening...\r\n"
     serv.serve_forever()
