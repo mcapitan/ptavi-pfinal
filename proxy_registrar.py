@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 """
-Clase (y programa principal) para un servidor de eco
-en UDP simple
+Miriam Capitán Roca
+Programa Proxy
 """
 
 import SocketServer
@@ -103,7 +103,6 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
                 if lista[0] == "INVITE":
 		            en_lista = False
 		            invitado = lista[1].split(':')[1]
-		            #print invitado
 
 		            for i in USUARIOS:
 		                if invitado == i:
@@ -131,8 +130,48 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
 		            else:
 		                # Envio NOT_FOUND
 		                self.wfile.write(Not_Found)
-		                # Lo guardo en el fichero de seguimiento
+                        #Escribo en log
+		                fichero.write(str(time1) + Not_Found)
+            elif not LINE:
+                break
 
+            if LINE:
+                if lista[0] == "ACK":
+                    nombre = lista[1].split(':')[1]
+                    destino = USUARIOS[nombre]
+                    self.my_socket.setsockopt(socket.SOL_SOCKET,
+                                              socket.SO_REUSEADDR, 1)
+                    self.my_socket.connect((destino[0], int(destino[1])))
+                    self.my_socket.send(LINE)
+                    print 'Enviado: ' + LINE + 'a: ' + str(destino[0]) + ' ' + str(destino[1])
+                    #Escribo en log
+                    fichero.write(str(time1) + ' Send to ' + str(destino[0])
+                    + ":" + str(destino[1]) + ": " + LINE)
+            elif not LINE:
+                break
+
+            if LINE:
+                if lista[0] == "BYE":
+                    nombre = lista[1].split(':')[1]
+                    destino = USUARIOS[nombre]
+                    self.my_socket.setsockopt(socket.SOL_SOCKET,
+                                              socket.SO_REUSEADDR, 1)
+                    self.my_socket.connect((destino[0], int(destino[1])))
+                    self.my_socket.send(LINE)
+                    print 'Enviado: ' + LINE + 'a: ' + str(destino[0]) + ' ' + str(destino[1])
+                    #Escribo en log
+                    fichero.write(str(time1) + ' Send to ' + str(destino[0])
+                    + ":" + str(destino[1]) + ": " + LINE)
+	                #Recibo el mensaje
+                    data = self.my_socket.recv(1024)
+                    data = self.my_socket.recv(1024)
+                    print 'Recibido: ' + data
+                    #Envio al ua1 el mensaje que recibo
+                    print "Enviado: " + data
+                    self.wfile.write(data)
+                    #Escribo en log
+                    fichero.write(str(time1) + ' Send to ' + str(destino[0])
+                    + ":" + str(destino[1]) + ": " + data)
 
             elif not LINE:
                 break
@@ -157,5 +196,5 @@ else:
     # Creamos servidor de eco y escuchamos
     serv = SocketServer.UDPServer((cHandler.ip_server,
     int(cHandler.puerto_server)), EchoHandler)
-    print "MiServer listening...\r\n"
+    print 'MiServer listening at port ' + cHandler.puerto_server + '...'
     serv.serve_forever()
