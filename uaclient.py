@@ -86,13 +86,13 @@ if __name__ == "__main__":
             #Escribo en el log
             fichero.write(str(time) + ' Starting...\r\n')
             fichero.write(str(time) + ' Send to ' + cHandler.ip_regproxy + ":"
-            + str(cHandler.puerto_regproxy) + ": " + LINE)
+                          + str(cHandler.puerto_regproxy) + ": " + LINE)
             #Recibo el mensaje
             data = my_socket.recv(1024)
             print 'Recibido: ' + data
             #Escribo en el log
             fichero.write(str(time) + ' Received from ' + cHandler.ip_regproxy
-            + ":" + str(cHandler.puerto_regproxy) + ": " + data)
+                          + ":" + str(cHandler.puerto_regproxy) + ": " + data)
         elif metodo == 'INVITE':
             LINE = metodo + ' sip:' + opcion + ' SIP/2.0\r\n'
             LINE += 'Content-Type: application/sdp\r\n\r\n'
@@ -105,26 +105,27 @@ if __name__ == "__main__":
             print 'Enviando: ' + LINE
             #Escribo en el log
             fichero.write(str(time) + ' Send to ' + cHandler.ip_regproxy + ":"
-            + str(cHandler.puerto_regproxy) + ": " + LINE + '\r\n')
+                          + str(cHandler.puerto_regproxy) + ": "
+                          + LINE + '\r\n')
             #Recibo el mensaje
             data = my_socket.recv(1024)
             print 'Recibido: ' + data
             #Escribo en el log
             fichero.write(str(time) + ' Received from ' + cHandler.ip_regproxy
-            + ":" + str(cHandler.puerto_regproxy) + ": " + data)
+                          + ":" + str(cHandler.puerto_regproxy) + ": " + data)
             #Envío el ACK si el usuario está registrado
             data = data.split()
             if data[1] == '100' and data[4] == '180' and data[7] == '200':
-		        LINE1 = 'ACK sip:' + opcion + ' SIP/2.0'
-		        my_socket.send(LINE1 + '\r\n')
-		        print 'Enviando: ' + LINE1
-		        #Intercambio de RTP
-		        aEjecutar = './mp32rtp -i ' + data[13] + ' -p '
-		        aEjecutar += data[17] + ' < '
-		        aEjecutar += cHandler.path_audio
-		        print "Vamos a ejecutar", aEjecutar
-		        os.system(aEjecutar)
-		        print "Ha terminado\r\n"
+                LINE1 = 'ACK sip:' + opcion + ' SIP/2.0'
+                my_socket.send(LINE1 + '\r\n')
+                print 'Enviando: ' + LINE1
+                #Intercambio de RTP
+                aEjecutar = './mp32rtp -i ' + data[13] + ' -p '
+                aEjecutar += data[17] + ' < '
+                aEjecutar += cHandler.path_audio
+                print "Vamos a ejecutar", aEjecutar
+                os.system(aEjecutar)
+                print "Ha terminado\r\n"
         elif metodo == 'BYE':
             LINE = metodo + ' sip:' + opcion + ' SIP/2.0\r\n'
             #Envío el mensaje
@@ -132,20 +133,20 @@ if __name__ == "__main__":
             print 'Enviando: ' + LINE
             #Escribo en el log
             fichero.write(str(time) + ' Send to ' + cHandler.ip_regproxy + ":"
-            + str(cHandler.puerto_regproxy) + ": " + LINE)
+                          + str(cHandler.puerto_regproxy) + ": " + LINE)
             #Recibo el mensaje
             data = my_socket.recv(1024)
             print 'Recibido: ' + data
             #Escribo en el log
             fichero.write(str(time) + ' Received from ' + cHandler.ip_regproxy
-            + ":" + str(cHandler.puerto_regproxy) + ": " + data)
+                          + ":" + str(cHandler.puerto_regproxy) + ": " + data)
             fichero.write(str(time) + ' Finishing.\r\n')
     except socket.error:
         print ('Error: No server listening at ' + cHandler.ip_uaserver +
-        ' port ' + str(cHandler.puerto_uaserver) + '\r\n')
+               ' port ' + str(cHandler.puerto_uaserver) + '\r\n')
         #Escribo en el log
         fichero.write('Error: No server listening at ' + cHandler.ip_uaserver
-        + str(cHandler.puerto_uaserver) + '\r\n')
+                      + str(cHandler.puerto_uaserver) + '\r\n')
 
     print "Terminando socket..."
 
