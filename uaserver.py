@@ -5,6 +5,7 @@ Clase (y programa principal) para un servidor de eco en UDP simple
 """
 
 import SocketServer
+import socket
 import sys
 import os
 import time
@@ -71,19 +72,14 @@ class EchoHandler(SocketServer.DatagramRequestHandler):
                     reply += 'SIP/2.0 200 OK\r\n\r\n'
                     reply += 'Content-Type: application/sdp\r\n\r\n'
                     reply += 'v=0\r\n' + 'o=' + cHandler.username + ' '
-                    reply += cHandler.ip_uaserver + '\r\n' + 's=misesion\r\n'
-                    reply += 't=0\r\n' + 'm=audio ' + cHandler.puerto_rtpaudio
+                    reply += str(cHandler.ip_uaserver) + '\r\n' + 's=misesion\r\n'
+                    reply += 't=0\r\n' + 'm=audio ' + str(cHandler.puerto_rtpaudio)
                     reply +=' RTP'
                     #Escribo en el log
                     fichero.write(str(time) + ' Received from '
                     + cHandler.ip_regproxy + ":"
                     + str(cHandler.puerto_regproxy) + ": " + line)
-                    # Creamos el socket, lo configuramos y lo atamos a un servidor/puerto
-                    my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                    my_socket.connect((cHandler.ip_regproxy, int(cHandler.puerto_regproxy)))
-                    #Envío el mensaje
-                    my_socket.send(reply + '\r\n')
+                    self.wfile.write(reply)
                     print 'Enviando: ' + reply
                     #Escribo en el log
                     fichero.write(str(time) + ' Send to '
